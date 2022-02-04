@@ -2,7 +2,6 @@ const inp = document.getElementById("inp");
 const btn = document.getElementById("btn");
 const list = document.getElementById("list");
 const para = document.getElementById("para");
-let flag = 0;
 // let elements;
 
 btn.addEventListener("click", additem);
@@ -10,7 +9,6 @@ list.addEventListener("click", delcheck);
 document.addEventListener("DOMContentLoaded", getfromlocal);
 
 function additem(e) {
-  //   getfromlocal();
   e.preventDefault();
 
   if (inp.value == "") {
@@ -47,42 +45,54 @@ function additem(e) {
   //Adding to the localstorage
   saveltolocal(inp.value);
 
-  //   getfromlocal();
-  location.reload();
+  let p = document.getElementById('para');
+  p.style.display = 'none';
 
   inp.value = "";
 }
 
 function search() {
-  let filter = inp.value.toUpperCase();
-  let li = document.getElementsByTagName("li");
-  let cnt = 0;
-  // console.log(filter);
-  for (let i = 0; i < li.length; i++) {
-    let text = li[i].innerText;
-    // console.log(text);
-    if (text.toUpperCase().indexOf(filter) > -1) {
-      // console.log(text.toUpperCase.indexOf(filter));
-      li[i].parentElement.style.display = "flex";
-      cnt++;
+  let filter = inp.value.toUpperCase().trim();
+  let elements;
+    if (localStorage.getItem("elements") === null) {
+      elements = [];
     } else {
-      li[i].parentElement.style.display = "none";
+      // getting the elements saved in localStorage in array
+      elements = JSON.parse(localStorage.getItem("elements"));
     }
-  }
 
-  if (cnt == 1) {
-    btn.disabled = true;
-  } else {
-    btn.disabled = false;
-  }
 
-  // if(cnt == 0 && flag == 0){
-  //     flag = 1;
-  //     const item = document.createElement('div');
-  //     item.classList.add('notfound');ssss
-  //     item.innerText = "Not Found! Add a new one..."
-  //     list.appendChild(item);
-  // };
+    let arr = [];
+    for(let i of elements){
+      arr.push(i.text.toUpperCase());
+    }
+
+    let p = document.getElementById('para');
+
+    if(arr.length != 0){
+      if(arr.includes(filter)){
+        p.innerText = "Task Already Exists!";
+        p.style.display = 'block';
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+      }
+      else if(filter === ""){
+        p.style.display = "none";
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }
+      else{
+        p.innerText = "Task Not Found! Add A New One.";
+        p.style.display = "block";
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }
+    }
+    else{
+      p.innerText = "No Tasks. Add A New One.";
+      btn.disabled = false;
+      p.style.display = "block";
+    }
 }
 
 function delcheck(e) {
@@ -93,9 +103,10 @@ function delcheck(e) {
   if (clicked.classList[0] === "delebtn") {
     const parent = clicked.parentElement;
     removefromlocal(parent);
+    search();
     parent.remove();
   }
-
+  // console.log(clicked.classList[0]);
   if (clicked.classList[0] === "checkbtn") {
     let elements;
     if (localStorage.getItem("elements") === null) {
